@@ -25,6 +25,57 @@ const controller = createHotspotsController();
 // FireCalendar API client for proxying calendar/meta endpoints
 const fireCalendarClient = createFireCalendarClient();
 
+// Static data cache (loaded once at startup)
+let zonesCache: any[] | null = null;
+let watchpointsCache: any[] | null = null;
+
+// Load static data at startup
+async function loadStaticData(): Promise<void> {
+  try {
+    // Load zones
+    const zonesPath = new URL("../data/zones.json", import.meta.url);
+    const zonesFile = Bun.file(zonesPath);
+    if (await zonesFile.exists()) {
+      zonesCache = await zonesFile.json();
+    } else {
+      // Fallback to inline data if file doesn't exist
+      zonesCache = getDefaultZones();
+    }
+
+    // Load watchpoints
+    const watchpointsPath = new URL("../data/watchpoints.json", import.meta.url);
+    const watchpointsFile = Bun.file(watchpointsPath);
+    if (await watchpointsFile.exists()) {
+      watchpointsCache = await watchpointsFile.json();
+    }
+  } catch (error) {
+    console.error("[Startup] Failed to load static data:", error);
+    zonesCache = getDefaultZones();
+  }
+}
+
+// Default zones data (fallback if JSON file missing)
+function getDefaultZones(): any[] {
+  return [
+    { id: "z1", name: "Amazon Basin", country: "Brazil", cont: "South America", ring: [[-70, -10], [-50, -10], [-50, 5], [-70, 5], [-70, -10]] },
+    { id: "z2", name: "Congo Basin", country: "DRC", cont: "Africa", ring: [[15, -5], [30, -5], [30, 5], [15, 5], [15, -5]] },
+    { id: "z3", name: "Siberian Taiga", country: "Russia", cont: "Asia", ring: [[80, 55], [120, 55], [120, 65], [80, 65], [80, 55]] },
+    { id: "z4", name: "Western US", country: "USA", cont: "North America", ring: [[-125, 32], [-105, 32], [-105, 49], [-125, 49], [-125, 32]] },
+    { id: "z5", name: "Northern Australia", country: "Australia", cont: "Australia", ring: [[120, -20], [145, -20], [145, -10], [120, -10], [120, -20]] },
+    { id: "z6", name: "Central Africa", country: "CAR", cont: "Africa", ring: [[15, 3], [25, 3], [25, 10], [15, 10], [15, 3]] },
+    { id: "z7", name: "Indonesia", country: "Indonesia", cont: "Asia", ring: [[95, -10], [140, -10], [140, 5], [95, 5], [95, -10]] },
+    { id: "z8", name: "Bolivia/Paraguay", country: "Bolivia", cont: "South America", ring: [[-65, -25], [-55, -25], [-55, -15], [-65, -15], [-65, -25]] },
+    { id: "z9", name: "Zambia/Angola", country: "Zambia", cont: "Africa", ring: [[20, -18], [33, -18], [33, -8], [20, -8], [20, -18]] },
+    { id: "z10", name: "Mekong Delta", country: "Vietnam", cont: "Asia", ring: [[100, 8], [110, 8], [110, 16], [100, 16], [100, 8]] },
+    { id: "z11", name: "Central Savanna", country: "Congo (DRC)", cont: "Africa", ring: [[24, -9], [26, -9], [26, -7], [24, -7], [24, -9]] },
+    { id: "z12", name: "Central Portugal", country: "Portugal", cont: "Europe", ring: [[-8.2, 39.8], [-7, 39.8], [-7, 41], [-8.2, 41], [-8.2, 39.8]] },
+    { id: "z13", name: "Eastern Taiga", country: "Russia", cont: "Asia", ring: [[110, 56], [113, 56], [113, 58], [110, 58], [110, 56]] },
+  ];
+}
+
+// Initialize static data on module load
+loadStaticData();
+
 // ============ Middleware ============
 
 /**
@@ -505,131 +556,48 @@ router.get("/hotspots/csv", async (req: Request, res: Response, next: NextFuncti
 /**
  * GET /api/zones
  * Get watch zones (predefined areas of interest for monitoring)
- * Returns static zones for now - could be extended to load from database/config
+ * Returns static zones loaded from JSON file at startup (with inline fallback)
  */
-router.get("/zones", (req: Request, res: Response) => {
-  // Predefined watch zones (matching the mock-up)
-  const zones = [
-    {
-      id: "z1",
-      name: "Amazon Basin",
-      country: "Brazil",
-      cont: "South America",
-      ring: [[-70, -10], [-50, -10], [-50, 5], [-70, 5], [-70, -10]],
-    },
-    {
-      id: "z2",
-      name: "Congo Basin",
-      country: "DRC",
-      cont: "Africa",
-      ring: [[15, -5], [30, -5], [30, 5], [15, 5], [15, -5]],
-    },
-    {
-      id: "z3",
-      name: "Siberian Taiga",
-      country: "Russia",
-      cont: "Asia",
-      ring: [[80, 55], [120, 55], [120, 65], [80, 65], [80, 55]],
-    },
-    {
-      id: "z4",
-      name: "Western US",
-      country: "USA",
-      cont: "North America",
-      ring: [[-125, 32], [-105, 32], [-105, 49], [-125, 49], [-125, 32]],
-    },
-    {
-      id: "z5",
-      name: "Northern Australia",
-      country: "Australia",
-      cont: "Australia",
-      ring: [[120, -20], [145, -20], [145, -10], [120, -10], [120, -20]],
-    },
-    {
-      id: "z6",
-      name: "Central Africa",
-      country: "CAR",
-      cont: "Africa",
-      ring: [[15, 3], [25, 3], [25, 10], [15, 10], [15, 3]],
-    },
-    {
-      id: "z7",
-      name: "Indonesia",
-      country: "Indonesia",
-      cont: "Asia",
-      ring: [[95, -10], [140, -10], [140, 5], [95, 5], [95, -10]],
-    },
-    {
-      id: "z8",
-      name: "Bolivia/Paraguay",
-      country: "Bolivia",
-      cont: "South America",
-      ring: [[-65, -25], [-55, -25], [-55, -15], [-65, -15], [-65, -25]],
-    },
-    {
-      id: "z9",
-      name: "Zambia/Angola",
-      country: "Zambia",
-      cont: "Africa",
-      ring: [[20, -18], [33, -18], [33, -8], [20, -8], [20, -18]],
-    },
-    {
-      id: "z10",
-      name: "Mekong Delta",
-      country: "Vietnam",
-      cont: "Asia",
-      ring: [[100, 8], [110, 8], [110, 16], [100, 16], [100, 8]],
-    },
-    {
-      id: "z11",
-      name: "Central Savanna",
-      country: "Congo (DRC)",
-      cont: "Africa",
-      ring: [[24, -9], [26, -9], [26, -7], [24, -7], [24, -9]],
-    },
-    {
-      id: "z12",
-      name: "Central Portugal",
-      country: "Portugal",
-      cont: "Europe",
-      ring: [[-8.2, 39.8], [-7, 39.8], [-7, 41], [-8.2, 41], [-8.2, 39.8]],
-    },
-    {
-      id: "z13",
-      name: "Eastern Taiga",
-      country: "Russia",
-      cont: "Asia",
-      ring: [[110, 56], [113, 56], [113, 58], [110, 58], [110, 56]],
-    },
-  ];
+router.get("/zones", (req: Request, res: Response, next: NextFunction) => {
+  try {
+    // Use cached data (loaded at startup)
+    const zones = zonesCache || getDefaultZones();
 
-  res.json({
-    success: true,
-    data: zones,
-  });
+    res.json({
+      success: true,
+      data: zones,
+    });
+  } catch (error) {
+    next(error);
+  }
 });
 
 /**
  * GET /api/watchpoint
  * Get watchpoints data from JSON file
- * Returns predefined watchpoints for fire monitoring
+ * Returns predefined watchpoints for fire monitoring (cached at startup)
  */
-router.get("/watchpoint", (req: Request, res: Response, next: NextFunction) => {
+router.get("/watchpoint", async (req: Request, res: Response, next: NextFunction) => {
   try {
-    // Read watchpoints data from JSON file using Bun's file API
-    const watchpointsPath = new URL("../data/watchpoints.json", import.meta.url);
-    const file = Bun.file(watchpointsPath);
+    // Use cached data (loaded at startup)
+    const watchpoints = watchpointsCache;
 
-    file.json()
-      .then((watchpoints) => {
-        res.json({
-          success: true,
-          data: watchpoints,
-        });
-      })
-      .catch((error) => {
-        next(error);
+    if (!watchpoints) {
+      // Fallback: try loading on-demand if cache missed
+      const watchpointsPath = new URL("../data/watchpoints.json", import.meta.url);
+      const file = Bun.file(watchpointsPath);
+      const data = await file.json();
+      watchpointsCache = data;
+      return res.json({
+        success: true,
+        data: data,
       });
+    }
+
+    res.json({
+      success: true,
+      data: watchpoints,
+    });
   } catch (error) {
     next(error);
   }

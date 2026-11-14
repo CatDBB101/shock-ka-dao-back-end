@@ -10,6 +10,154 @@ REST API for transforming and serving fire hotspots data from the FireCalendar A
 
 ---
 
+## API Usage Sequence (ลำดับการเรียกใช้ API)
+
+This section describes the recommended order of API calls for typical workflows. Understanding this flow helps avoid common errors (e.g., querying data before loading it).
+
+### Overview of Data Flow
+
+```
+┌─────────────────┐     ┌──────────────────┐     ┌─────────────────────┐
+│  FireCalendar   │     │  This API        │     │  Frontend           │
+│  API (External) │────▶│  (Hotspots API)  │────▶│  Application        │
+└─────────────────┘     └──────────────────┘     └─────────────────────┘
+                              │
+                    ┌─────────┴─────────┐
+                    ▼                   ▼
+            ┌───────────────┐    ┌───────────────┐
+            │  Load Data    │    │  Query Data   │
+            │  (POST /load) │    │  (GET /hotspots│
+            │               │    │   & variants) │
+            └───────────────┘    └───────────────┘
+```
+
+---
+
+### Workflow 1: Using FireCalendar API as Data Source (Recommended)
+
+This is the primary workflow when you want to fetch real-time or historical fire data from the FireCalendar API.
+
+#### Step 1: Health Check (Optional but Recommended)
+```bash
+GET /health
+```
+Verify the API is running before making other calls.
+
+#### Step 2: Download CSV from FireCalendar API
+```bash
+# Direct from FireCalendar API (external)
+GET {FIRECALENDAR_API_URL}/v1/hotspots.csv?min_lat={}&max_lat={}&min_lon={}&max_lon={}&start={}&end={}
+```
+**Parameters:**
+- `min_lat`, `max_lat`: Latitude bounds (e.g., -35, -32)
+- `min_lon`, `max_lon`: Longitude bounds (e.g., -62, -57)
+- `start`, `end`: Date range in YYYY-MM-DD format
+- `source` (optional): `observed` | `backcast` | `backcast_terra`
+
+> **Tip**: The FireCalendar API requires a valid `FIRMS_MAP_KEY` configured on the server.
+
+#### Step 3: Load CSV into This API
+```bash
+POST /hotspots/load
+Content-Type: application/json
+
+{
+  "csv": "<CSV_TEXT_FROM_STEP_2>"
+}
+```
+**Response:** `{ "success": true, "message": "Loaded 1500 hotspot records", "count": 1500 }`
+
+> For large datasets (>50k rows), use `POST /hotspots/load-async` with `batchSize` parameter.
+
+#### Step 4: Query Data (Multiple Options)
+Now you can query the loaded data using any of these endpoints:
+
+| Endpoint | Use Case |
+|----------|----------|
+| `GET /hotspots` | Main endpoint with full filtering, pagination, format options |
+| `GET /hotspots?format=geojson` | Map rendering (Mapbox, Leaflet) |
+| `GET /hotspots?format=timeseries` | Charts, trend analysis |
+| `GET /hotspots/stats` | Quick statistics without raw data |
+| `GET /hotspots/geojson` | Convenience GeoJSON endpoint |
+| `GET /hotspots/timeseries` | Convenience time series endpoint |
+
+#### Step 5: (Optional) Clear Data When Done
+```bash
+DELETE /hotspots
+```
+Frees memory. Useful when switching to a different geographic area or date range.
+
+---
+
+### Workflow 2: Direct CSV Upload (Testing / Custom Data)
+
+Use this when you have CSV data from other sources or for testing.
+
+#### Step 1: Health Check (Optional)
+```bash
+GET /health
+```
+
+#### Step 2: Load Your CSV Directly
+```bash
+POST /hotspots/load
+Content-Type: application/json
+
+{
+  "csv": "latitude,longitude,brightness,frp,confidence,date,time,satellite,instrument,daynight\n-33.1234,-59.5678,320.5,45.6,high,2024-01-15,14:30,SNPP,VIIRS,D\n..."
+}
+```
+
+#### Step 3: Query Data (Same as Workflow 1 Step 4)
+
+---
+
+### Workflow 3: Server Auto-Load (Development)
+
+When starting the development server (`bun --hot src/api/server.ts`), the server **automatically loads sample data** from FireCalendar API on startup. You can skip Steps 2-3 above and go directly to querying.
+
+> **Note**: Auto-load uses default bounding box and date range. Override by calling `POST /hotspots/load` with your own data.
+
+---
+
+### Quick Reference: Call Order Summary
+
+| Order | Action | Endpoint | Required? |
+|-------|--------|----------|-----------|
+| 1 | Check API health | `GET /health` | Optional |
+| 2 | **Load data** | `POST /hotspots/load` or `POST /hotspots/load-async` | **YES** (unless auto-loaded) |
+| 3 | Query data | `GET /hotspots` (or variants) | As needed |
+| 4 | Get stats | `GET /hotspots/stats` | Optional |
+| 5 | Get watchpoints | `GET /watchpoint` | Optional (static data) |
+| 6 | Clear data | `DELETE /hotspots` | Optional (cleanup) |
+
+---
+
+### Common Error: `DATA_NOT_LOADED` (503)
+
+If you query `/hotspots` or related endpoints **before loading data**, you'll get:
+```json
+{
+  "success": false,
+  "error": "Service Unavailable",
+  "message": "No data loaded. Call POST /hotspots/load first.",
+  "code": "DATA_NOT_LOADED"
+}
+```
+**Fix:** Always call `POST /hotspots/load` first (or ensure server auto-load completed).
+
+---
+
+### Watchpoints (Independent)
+
+Watchpoints are static reference points and **do not require data loading**:
+```bash
+GET /watchpoint
+```
+Use anytime for map markers, drill-down navigation, or as seed points for AOI queries.
+
+---
+
 ## Authentication
 
 Currently no authentication required. Add API key or JWT as needed for production.

@@ -59,7 +59,8 @@ export class HotspotsController {
     const lines = csvText.trim().split("\n");
     if (lines.length < 2 || !lines[0]) {
       this.data = [];
-      this.isParsed = true;
+      this.stats = null;
+      this.isParsed = false; // Don't mark as parsed if no valid data
       return this.data;
     }
 
@@ -73,7 +74,6 @@ export class HotspotsController {
     for (let i = 1; i < lines.length; i++) {
       const line = lines[i]?.trim();
       if (!line) continue;
-      if (!line) continue;
 
       const values = this.parseCSVLine(line);
       if (values.length !== headers.length) continue;
@@ -86,7 +86,7 @@ export class HotspotsController {
 
     this.data = parsed.slice(0, validCount);
     this.stats = null; // Invalidate cached stats
-    this.isParsed = true;
+    this.isParsed = this.data.length > 0; // Only mark parsed if we have valid data
 
     return this.data;
   }
@@ -118,7 +118,7 @@ export class HotspotsController {
       if (row) {
         batch.push(row);
         if (batch.length >= batchSize) {
-          yield batch;
+          yield [...batch]; // Yield a copy to avoid reference issues
           batch.length = 0;
           // Yield control to event loop
           await new Promise((resolve) => setTimeout(resolve, 0));
@@ -127,7 +127,7 @@ export class HotspotsController {
     }
 
     if (batch.length > 0) {
-      yield batch;
+      yield [...batch]; // Yield a copy
     }
   }
 

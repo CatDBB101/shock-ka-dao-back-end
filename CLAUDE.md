@@ -8,8 +8,8 @@ This is a **FireCalendar API client** for the Shock-KA DAO back-end. It provides
 
 ## ⛔ Strict Rules
 
-- **NO SERVER CODE**: This is a client library only. Do NOT create, run, or build any HTTP server (Express, Bun.serve, etc.). The project only consumes external APIs and transforms data for frontend consumption.
 - **NO API CALLS IN CONTROLLERS**: Data transformation layers (e.g., `HotspotsController`) must be pure functions/classes with ZERO network calls. API calls are handled separately by `FireCalendarApiClient`.
+- **Server layer is separate**: The Express server in `src/api/` is a thin HTTP layer that delegates to the controller. It handles routing, middleware, and serialization only - no business logic.
 
 ## Commands
 
