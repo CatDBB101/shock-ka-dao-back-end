@@ -407,7 +407,7 @@ router.get("/calendar/aoi", async (req: Request, res: Response, next: NextFuncti
  * Generate URL for FIRMS hotspots CSV download from FireCalendar API
  * Query params: min_lat, max_lat, min_lon, max_lon, start (YYYY-MM-DD), end (YYYY-MM-DD), source?
  */
-router.get("/hotspots/csv-url", (req: Request, res: Response) => {
+router.get("/hotspots/csv-url", (req: Request, res: Response, next: NextFunction) => {
   try {
     const { min_lat, max_lat, min_lon, max_lon, start, end, source } = req.query;
 
@@ -607,6 +607,32 @@ router.get("/zones", (req: Request, res: Response) => {
     success: true,
     data: zones,
   });
+});
+
+/**
+ * GET /api/watchpoint
+ * Get watchpoints data from JSON file
+ * Returns predefined watchpoints for fire monitoring
+ */
+router.get("/watchpoint", (req: Request, res: Response, next: NextFunction) => {
+  try {
+    // Read watchpoints data from JSON file using Bun's file API
+    const watchpointsPath = new URL("../data/watchpoints.json", import.meta.url);
+    const file = Bun.file(watchpointsPath);
+
+    file.json()
+      .then((watchpoints) => {
+        res.json({
+          success: true,
+          data: watchpoints,
+        });
+      })
+      .catch((error) => {
+        next(error);
+      });
+  } catch (error) {
+    next(error);
+  }
 });
 
 /**

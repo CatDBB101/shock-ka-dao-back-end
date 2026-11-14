@@ -1,0 +1,205 @@
+[
+  {
+    "name": "South Sudan, Warrap State และ Lakes State",
+    "country": "South Sudan",
+    "region": "Africa",
+    "lat": 7.62637,
+    "lon": 29.4172
+  },
+  {
+    "name": "Western Equatoria, South Sudan",
+    "country": "South Sudan",
+    "region": "Africa",
+    "lat": 9.11851,
+    "lon": 23.80993
+  },
+  {
+    "name": "Zambezia Province, Mozambique",
+    "country": "Mozambique",
+    "region": "Africa",
+    "lat": -17.54588,
+    "lon": 36.67221
+  },
+  {
+    "name": "Lindi Region, Tanzania",
+    "country": "Tanzania",
+    "region": "Africa",
+    "lat": -10.0665,
+    "lon": 39.49218
+  },
+  {
+    "name": "Iringa Region, Tanzania (ใกล้เทือกเขา Udzungwa Mountains)",
+    "country": "Tanzania",
+    "region": "Africa",
+    "lat": -8.83594,
+    "lon": 35.65335
+  },
+  {
+    "name": "Morogoro Region, Tanzania (ตอนกลางค่อนไปทางตะวันออก)",
+    "country": "Tanzania",
+    "region": "Africa",
+    "lat": -6.43974,
+    "lon": 37.15159
+  },
+  {
+    "name": "Mashonaland East Province, Zimbabwe",
+    "country": "Zimbabwe",
+    "region": "Africa",
+    "lat": -17.21723,
+    "lon": 31.75543
+  },
+  {
+    "name": "Inhambane Province, Mozambique (ชายฝั่งทะเลใกล้ Vilankulo)",
+    "country": "Mozambique",
+    "region": "Africa",
+    "lat": -22.30072,
+    "lon": 35.11193
+  },
+  {
+    "name": "Est Region, Burkina Faso",
+    "country": "Burkina Faso",
+    "region": "Africa",
+    "lat": 11.54978,
+    "lon": 0.97136
+  },
+  {
+    "name": "Salamat Region, Chad",
+    "country": "Chad",
+    "region": "Africa",
+    "lat": 9.83218,
+    "lon": 19.35728
+  },
+  {
+    "name": "Vakaga Prefecture, Central African Republic",
+    "country": "Central African Republic",
+    "region": "Africa",
+    "lat": 9.68246,
+    "lon": 23.62293
+  },
+  {
+    "name": "Haut-Mbomou Prefecture, Central African Republic",
+    "country": "Central African Republic",
+    "region": "Africa",
+    "lat": 4.73127,
+    "lon": 24.06267
+  },
+  {
+    "name": "Zaire Province, Angola",
+    "country": "Angola",
+    "region": "Africa",
+    "lat": -6.44158,
+    "lon": 12.50849
+  },
+  {
+    "name": "Haut-Katanga, Congo",
+    "country": "Democratic Republic of the Congo",
+    "region": "Africa",
+    "lat": -10.74061,
+    "lon": 26.94505
+  },
+  {
+    "name": "Malanje Province, Angola",
+    "country": "Angola",
+    "region": "Africa",
+    "lat": -9.4342,
+    "lon": 17.6469
+  },
+  {
+    "name": "Gauteng Province, South Africa (West Rand District Municipality)",
+    "country": "South Africa",
+    "region": "Africa",
+    "lat": -26.4019,
+    "lon": 27.7093
+  },
+  {
+    "name": "Kasai-Central, Congo",
+    "country": "Democratic Republic of the Congo",
+    "region": "Africa",
+    "lat": -7.3015,
+    "lon": 22.1893
+  },
+  {
+    "name": "Soweto, Johannesburg, Gauteng Province, South Africa",
+    "country": "South Africa",
+    "region": "Africa",
+    "lat": -26.3004,
+    "lon": 27.8428
+  },
+  {
+    "name": "Porterville, Western Cape Province, South Africa",
+    "country": "South Africa",
+    "region": "Africa",
+    "lat": -33.0725,
+    "lon": 18.9445
+  },
+  {
+    "name": "Thoi Hung, Can Tho, Vietnam",
+    "country": "Vietnam",
+    "region": "Asia",
+    "lat": 10.08554,
+    "lon": 105.61582
+  },
+  {
+    "name": "Long Xuyên, An Giang Province, Vietnam",
+    "country": "Vietnam",
+    "region": "Asia",
+    "lat": 10.217,
+    "lon": 105.26513
+  },
+  {
+    "name": "Ea Kar District, Vietnam",
+    "country": "Vietnam",
+    "region": "Asia",
+    "lat": 12.6694,
+    "lon": 108.7341
+  },
+  {
+    "name": "Quan Son District, Thanh Hóa Province, Vietnam",
+    "country": "Vietnam",
+    "region": "Asia",
+    "lat": 19.8579,
+    "lon": 104.68227
+  },
+  {
+    "name": "San Jose del Monte, Bulacan Province, Philippines",
+    "country": "Philippines",
+    "region": "Asia",
+    "lat": 14.89722,
+    "lon": 121.07368
+  },
+  {
+    "name": "Rizal, Cagayan Province, Philippines",
+    "country": "Philippines",
+    "region": "Asia",
+    "lat": 19.9545,
+    "lon": 121.4662
+  },
+  {
+    "name": "Maddela, Quirino Province, Philippines",
+    "country": "Philippines",
+    "region": "Asia",
+    "lat": 16.17802,
+    "lon": 121.59889
+  },
+  {
+    "name": "Milagros, Masbate Island, Masbate Province, Philippines",
+    "country": "Philippines",
+    "region": "Asia",
+    "lat": 12.28482,
+    "lon": 123.44871
+  },
+  {
+    "name": "อำเภอขุนยวม จังหวัดแม่ฮ่องสอน ประเทศไทย",
+    "country": "Thailand",
+    "region": "Asia",
+    "lat": 18.78107,
+    "lon": 98.04369
+  },
+  {
+    "name": "อำเภอแม่สรวย จังหวัดเชียงราย ประเทศไทย",
+    "country": "Thailand",
+    "region": "Asia",
+    "lat": 19.9837,
+    "lon": 99.5565
+  }
+]
