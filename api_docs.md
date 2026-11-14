@@ -345,6 +345,61 @@ Clears all loaded data from the controller.
 
 ---
 
+### 9. Get Watchpoints
+
+```
+GET /watchpoint
+```
+
+Returns predefined watchpoints for fire monitoring. These are fixed geographic locations (points) that represent areas of interest for fire surveillance. Data is loaded from a static JSON file (`src/data/watchpoints.json`).
+
+**Response**
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "name": "South Sudan, Warrap State และ Lakes State",
+      "country": "South Sudan",
+      "region": "Africa",
+      "lat": 7.62637,
+      "lon": 29.4172
+    },
+    {
+      "name": "Western Equatoria, South Sudan",
+      "country": "South Sudan",
+      "region": "Africa",
+      "lat": 9.11851,
+      "lon": 23.80993
+    }
+    // ... more watchpoints
+  ]
+}
+```
+
+**Response Fields**
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `name` | string | Descriptive name of the watchpoint (may include Thai descriptions) |
+| `country` | string | Country name |
+| `region` | string | Geographic region (Africa, Asia, South America, etc.) |
+| `lat` | number | Latitude (WGS84, decimal degrees) |
+| `lon` | number | Longitude (WGS84, decimal degrees) |
+
+**Example Usage**
+```bash
+curl http://localhost:3000/api/watchpoint
+```
+
+**Notes**
+- Watchpoints are static and defined in `src/data/watchpoints.json`
+- Currently contains 33 watchpoints across Africa, Asia, and South America
+- Unlike `/zones` (which returns polygon rings), watchpoints are single coordinate points
+- Useful for map markers, drill-down navigation, or as seed points for AOI queries
+
+---
+
 ## Data Models
 
 ### HotspotRow
