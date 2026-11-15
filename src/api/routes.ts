@@ -604,6 +604,197 @@ router.get("/watchpoint", async (req: Request, res: Response, next: NextFunction
 });
 
 /**
+ * GET /api/predict
+ * Fire spread prediction endpoint
+ * Accepts fire origin coordinates, wind direction, and wind speed
+ * Returns a timeline (array) predicting fire spread progression
+ *
+ * Query Parameters:
+ * - lat: number (required) - Fire origin latitude
+ * - lon: number (required) - Fire origin longitude
+ * - windDirection: number (required) - Wind direction in degrees (0-360, 0 = North)
+ * - windSpeed: number (required) - Wind speed in km/h
+ * - timeStepHours?: number (optional, default: 1) - Time step for prediction in hours
+ * - maxSteps?: number (optional, default: 24) - Maximum number of prediction steps
+ *
+ * Response:
+ * - timeline: array of { step: number, lat: number, lon: number, timestamp: string, areaKm2?: number }
+ *
+ * Note: Currently returns a placeholder response. Will delegate to PredictController when implemented.
+ */
+router.get("/predict", (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { lat, lon, windDirection, windSpeed, timeStepHours, maxSteps } = req.query;
+
+    // Validate required parameters
+    if (
+      lat === undefined ||
+      lon === undefined ||
+      windDirection === undefined ||
+      windSpeed === undefined
+    ) {
+      return res.status(400).json({
+        success: false,
+        error: "Bad Request",
+        message: "Required parameters: lat, lon, windDirection, windSpeed",
+      });
+    }
+
+    // Parse and validate numeric values
+    const fireLat = Number(lat);
+    const fireLon = Number(lon);
+    const windDir = Number(windDirection);
+    const windSpd = Number(windSpeed);
+    const stepHours = timeStepHours ? Number(timeStepHours) : 1;
+    const steps = maxSteps ? Number(maxSteps) : 24;
+
+    if (isNaN(fireLat) || isNaN(fireLon) || isNaN(windDir) || isNaN(windSpd)) {
+      return res.status(400).json({
+        success: false,
+        error: "Bad Request",
+        message: "Parameters lat, lon, windDirection, windSpeed must be valid numbers",
+      });
+    }
+
+    // Validate ranges
+    if (fireLat < -90 || fireLat > 90) {
+      return res.status(400).json({
+        success: false,
+        error: "Bad Request",
+        message: "Latitude must be between -90 and 90",
+      });
+    }
+
+    if (fireLon < -180 || fireLon > 180) {
+      return res.status(400).json({
+        success: false,
+        error: "Bad Request",
+        message: "Longitude must be between -180 and 180",
+      });
+    }
+
+    if (windDir < 0 || windDir >= 360) {
+      return res.status(400).json({
+        success: false,
+        error: "Bad Request",
+        message: "Wind direction must be between 0 and 359 degrees",
+      });
+    }
+
+    if (windSpd < 0) {
+      return res.status(400).json({
+        success: false,
+        error: "Bad Request",
+        message: "Wind speed must be non-negative",
+      });
+    }
+
+    if (stepHours < 0.1 || stepHours > 24) {
+      return res.status(400).json({
+        success: false,
+        error: "Bad Request",
+        message: "timeStepHours must be between 0.1 and 24",
+      });
+    }
+
+    if (steps < 1 || steps > 168) {
+      return res.status(400).json({
+        success: false,
+        error: "Bad Request",
+        message: "maxSteps must be between 1 and 168 (1 week)",
+      });
+    }
+
+    // TODO: Delegate to PredictController when implemented
+    // const timeline = predictController.predict({
+    //   origin: { lat: fireLat, lon: fireLon },
+    //   windDirection: windDir,
+    //   windSpeed: windSpd,
+    //   timeStepHours: stepHours,
+    //   maxSteps: steps,
+    // });
+
+    // Placeholder response structure (matches expected format)
+    const timeline = generatePlaceholderTimeline(
+      fireLat,
+      fireLon,
+      windDir,
+      windSpd,
+      stepHours,
+      steps,
+    );
+
+    res.json({
+      success: true,
+      data: {
+        timeline,
+        meta: {
+          origin: { lat: fireLat, lon: fireLon },
+          windDirection: windDir,
+          windSpeed: windSpd,
+          timeStepHours: stepHours,
+          maxSteps: steps,
+          generatedAt: new Date().toISOString(),
+          note: "Placeholder response - PredictController not yet implemented",
+        },
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+/**
+ * Generate placeholder timeline for fire spread prediction
+ * This is a simple simulation based on wind direction/speed
+ * Will be replaced by actual PredictController implementation
+ */
+function generatePlaceholderTimeline(
+  originLat: number,
+  originLon: number,
+  windDirection: number,
+  windSpeed: number,
+  timeStepHours: number,
+  maxSteps: number,
+): Array<{ step: number; lat: number; lon: number; timestamp: string; areaKm2: number }> {
+  // Convert wind direction to radians (0 = North, clockwise)
+  const windRad = (windDirection * Math.PI) / 180;
+
+  // Rough approximation: 1 degree ≈ 111 km
+  // Fire spread rate roughly proportional to wind speed
+  const spreadKmPerHour = Math.max(0.1, windSpeed * 0.05); // km/h
+  const spreadDegPerHour = spreadKmPerHour / 111; // degrees per hour
+
+  const timeline = [];
+  const startTime = new Date();
+
+  for (let step = 0; step <= maxSteps; step++) {
+    const hoursElapsed = step * timeStepHours;
+    const distanceDeg = spreadDegPerHour * hoursElapsed;
+
+    // Calculate new position based on wind direction
+    const lat = originLat + distanceDeg * Math.cos(windRad);
+    const lon = originLon + distanceDeg * Math.sin(windRad);
+
+    // Estimate burned area (rough circular approximation)
+    const radiusKm = spreadKmPerHour * hoursElapsed;
+    const areaKm2 = Math.PI * radiusKm * radiusKm;
+
+    const timestamp = new Date(startTime.getTime() + hoursElapsed * 3600 * 1000).toISOString();
+
+    timeline.push({
+      step,
+      lat: Number(lat.toFixed(6)),
+      lon: Number(lon.toFixed(6)),
+      timestamp,
+      areaKm2: Number(areaKm2.toFixed(2)),
+    });
+  }
+
+  return timeline;
+}
+
+/**
  * GET /api/health
  * Health check endpoint
  */
